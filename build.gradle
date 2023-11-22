@@ -1,0 +1,17 @@
+plugins {
+	id "de.undercouch.download" version "+"
+}
+
+tasks.register("setupFiles") {
+	download.run {
+		src "https://github.com/BelfrySCAD/BOSL2/archive/refs/heads/master.zip"
+		dest "models/libraries/bosl2.zip"
+		overwrite true
+		retries - 1
+	}
+	copy {
+		outputs.upToDateWhen { false }
+		from(zipTree("models/libraries/bosl2.zip")) { eachFile { file -> file.relativePath = new RelativePath(true, file.relativePath.segments.drop(1) as String[]) } }
+		into "models/libraries"
+	}
+}
