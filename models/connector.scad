@@ -38,10 +38,10 @@ module connector()
         slicer();
         connector_piece(0, false);
         connector_piece(0, true);
-        down(sphere_offset_z) left(sphere_offset_y) small_sphere(connector_padding);
+        down(sphere_offset_z) left(sphere_offset_y) fwd(1 - connector_padding * 2) small_sphere(connector_padding);
     }
 
-    down(sphere_offset_z) right(sphere_offset_y) small_sphere(0);
+    down(sphere_offset_z) right(sphere_offset_y) back(1 - connector_padding * 2) small_sphere(0);
 
     intersection()
     {
