@@ -1,0 +1,13 @@
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation "commons-io:commons-io:+"
+}
+
+java {
+	toolchain {
+		languageVersion.set(JavaLanguageVersion.of(8))
+	}
+}
