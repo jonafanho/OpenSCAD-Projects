@@ -39,7 +39,7 @@ public final class BuildTools {
 							modelsPath.resolve("application/openscad.com").toString(),
 							"-o",
 							buildPath.resolve(fileName.replace(".scad", ".stl")).toString(),
-							"-D", "\"\"$fn=400\"\"",
+							"-D", "$fn=400",
 							path.toString()
 					);
 
