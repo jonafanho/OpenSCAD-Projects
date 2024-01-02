@@ -2,4 +2,4 @@ plugins {
 	id "org.gradle.toolchains.foojay-resolver-convention" version "+"
 }
 
-rootProject.name = "Marble-Tracks"
+rootProject.name = "OpenSCAD-Projects"

@@ -1,5 +1,5 @@
+include <../libraries/gears.scad>
 include <connector.scad>
-include <libraries/gears.scad>
 
 pitch = 1.5;
 teeth_small = 12;

@@ -1,4 +1,4 @@
-import org.marble.BuildTools
+import org.project.BuildTools
 
 plugins {
 	id "de.undercouch.download" version "+"
@@ -25,5 +25,5 @@ tasks.register("setupFiles") {
 }
 
 tasks.register("build") {
-	BuildTools.build(project)
+	BuildTools.build(project, namespace)
 }

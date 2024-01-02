@@ -1,4 +1,4 @@
-package org.marble;
+package org.project;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,10 +24,10 @@ public final class BuildTools {
 		}
 	}
 
-	public static void build(Project project) throws IOException {
+	public static void build(Project project, String namespace) throws IOException {
 		final Path rootPath = project.getProjectDir().toPath();
-		final Path modelsPath = rootPath.resolve("models");
-		final Path buildPath = rootPath.resolve("build/models");
+		final Path modelsPath = rootPath.resolve("models").resolve(namespace);
+		final Path buildPath = rootPath.resolve("build/models").resolve(namespace);
 		Files.createDirectories(buildPath);
 
 		try (final Stream<Path> stream = Files.list(modelsPath)) {
@@ -36,7 +36,7 @@ public final class BuildTools {
 				if (fileName.endsWith(".scad")) {
 					final ProcessBuilder processBuilder = new ProcessBuilder();
 					processBuilder.command(
-							modelsPath.resolve("application/openscad.com").toString(),
+							modelsPath.resolve("../application/openscad.com").toString(),
 							"-o",
 							buildPath.resolve(fileName.replace(".scad", ".stl")).toString(),
 							"-D", "$fn=400",

@@ -3,6 +3,10 @@ on: [ pull_request, push ]
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        namespace: [ constellations, marble_tracks, minecraft ]
     runs-on: windows-latest
     steps:
       - name: Checkout repository
@@ -19,9 +23,9 @@ jobs:
       - name: Setup files
         run: ./gradlew setupFiles
       - name: Build models
-        run: ./gradlew build
+        run: ./gradlew build -Pnamespace="${{ matrix.namespace }}"
       - name: Capture build artifacts
         uses: actions/upload-artifact@main
         with:
-          name: Models
-          path: build/models/
+          name: Models ${{ matrix.namespace }}
+          path: build/models/${{ matrix.namespace }}/
