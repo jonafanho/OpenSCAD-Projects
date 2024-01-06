@@ -1,292 +1,64 @@
 include <../libraries/rounding.scad>
 include <../libraries/std.scad>
 
+// 1. Download the full size constellation image from https://www.iau.org/public/themes/constellations
+// 2. Get the x, y, and width of each star
+// 3. Normalize all x y coordinates
+// 4. Get the height of 10 degrees on the map and the width of the "2" star in the legend
+
 star_height = 2;
 bar_height = 1;
 bar_width = 2;
 point_scale = 60;
 star_scale = 0.8;
 
-module star(corners, size)
+module star(corners, size, offset)
 {
-    linear_extrude(star_height)
-        polygon(round_corners(path = star(n = corners, r = 10 * size, ir = 5 * size), r = size));
+    path = round_corners(path = star(n = corners, r = 10 * size, ir = 5 * size), r = size);
+    linear_extrude(star_height) polygon(offset == 0 ? path : offset(path, delta = offset));
 }
 
-module constellation(points, connections, scale)
+module constellation(points, connections, scale, raised, dotted)
 {
     scale1 = point_scale / scale[0];
     scale2 = star_scale / scale[1];
 
-    for (point = points)
+    module stars(offset)
     {
-        right(point[0] * scale1) fwd(point[1] * scale1) star(5, point[2] * scale2);
+        for (point = points)
+        {
+            right(point[0] * scale1) fwd(point[1] * scale1) star(5, point[2] * scale2, offset);
+        }
     }
 
-    for (group = connections)
+    module connections(width, height)
     {
-        path = [for (connection = group)[points[connection][0] * scale1, -points[connection][1] * scale1]];
-        path_extrude2d(path) square([ bar_width, bar_height ], anchor = BOTTOM);
+        for (group = connections)
+        {
+            path = [for (connection = group)[points[connection][0] * scale1, -points[connection][1] * scale1]];
+            path_extrude2d(path) square([ width, height ], anchor = BOTTOM);
+        }
+    }
+
+    stars(0);
+    connections(bar_width, bar_height);
+
+    if (raised)
+    {
+        difference()
+        {
+            connections(bar_width / 3, star_height);
+            stars(bar_width / 3);
+
+            if (dotted)
+            {
+                for (group = connections)
+                {
+                    path = [for (connection = group)[points[connection][0] * scale1, -points[connection][1] * scale1]];
+                    path_copies(path, spacing = bar_width * 2)
+                        cube([ bar_width * 2 - bar_width * 2 / 3, bar_width, star_height ], anchor = BOTTOM);
+                }
+            }
+        }
     }
 }
-
-zodiac_constellations = [
-    // Aquarius
-    [
-        [
-            [ 1289, 362, 21 ],
-            [ 910, 203, 27 ],
-            [ 608, 11, 27 ],
-            [ 465, 48, 20 ],
-            [ 400, 0, 22 ],
-            [ 341, 5, 19 ],
-            [ 0, 226, 18 ],
-            [ 194, 273, 21 ],
-            [ 226, 486, 19 ],
-            [ 184, 566, 24 ],
-            [ 509, 275, 19 ],
-            [ 599, 492, 19 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ],
-            [ 2, 10, 11 ],
-        ],
-        [ 358, 36 ]
-    ],
-    // Aries
-    [
-        [
-            [ 0, 0, 32 ],
-            [ 514, 191, 53 ],
-            [ 674, 320, 43 ],
-            [ 693, 399, 34 ],
-        ],
-        [
-            [ 0, 1, 2, 3 ],
-        ],
-        [ 530, 52 ]
-    ],
-    // Cancer
-    [
-        [
-            [ 174, 0, 30 ],
-            [ 206, 382, 24 ],
-            [ 185, 554, 29 ],
-            [ 0, 878, 26 ],
-            [ 410, 844, 19 ],
-            [ 545, 1024, 33 ],
-        ],
-        [
-            [ 0, 1, 2, 3 ],
-            [ 2, 4, 5 ],
-        ],
-        [ 528, 52 ]
-    ],
-    // Capricornus
-    [
-        [
-            [ 1142, 0, 33 ],
-            [ 1094, 113, 37 ],
-            [ 768, 657, 27 ],
-            [ 698, 742, 28 ],
-            [ 518, 643, 25 ],
-            [ 276, 510, 30 ],
-            [ 253, 482, 25 ],
-            [ 144, 364, 25 ],
-            [ 0, 189, 40 ],
-            [ 94, 215, 32 ],
-            [ 322, 217, 26 ],
-            [ 527, 233, 27 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 1 ],
-        ],
-        [ 533, 52 ]
-    ],
-    // Gemini
-    [
-        [
-            [ 12, 474, 33 ],
-            [ 124, 353, 29 ],
-            [ 246, 312, 31 ],
-            [ 423, 194, 25 ],
-            [ 631, 0, 32 ],
-            [ 142, 78, 59 ],
-            [ 732, 459, 38 ],
-            [ 986, 589, 40 ],
-            [ 1086, 587, 35 ],
-            [ 1217, 544, 27 ],
-            [ 923, 718, 28 ],
-            [ 0, 267, 67 ],
-            [ 296, 619, 32 ],
-            [ 490, 700, 31 ],
-            [ 807, 908, 52 ],
-            [ 309, 905, 32 ],
-            [ 722, 1102, 34 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4 ],
-            [ 5, 3, 6, 7, 8, 9 ],
-            [ 6, 10 ],
-            [ 11, 1, 12, 13, 14 ],
-            [ 12, 15, 16 ],
-        ],
-        [ 529, 52 ]
-    ],
-    // Leo
-    [
-        [
-            [ 1260, 89, 32 ],
-            [ 1191, 0, 25 ],
-            [ 954, 115, 27 ],
-            [ 915, 260, 42 ],
-            [ 1055, 396, 27 ],
-            [ 1037, 588, 52 ],
-            [ 367, 452, 28 ],
-            [ 0, 468, 41 ],
-            [ 370, 232, 35 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 3 ],
-        ],
-        [ 427, 43 ]
-    ],
-    // Libra
-    [
-        [
-            [ 0, 1077, 32 ],
-            [ 17, 990, 32 ],
-            [ 24, 292, 30 ],
-            [ 253, 0, 44 ],
-            [ 581, 356, 41 ],
-            [ 410, 839, 35 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5 ],
-            [ 2, 4 ],
-        ],
-        [ 528, 52 ]
-    ],
-    // Pisces
-    [
-        [
-            [ 493, 0, 17 ],
-            [ 426, 98, 16 ],
-            [ 469, 195, 16 ],
-            [ 301, 511, 22 ],
-            [ 168, 724, 18 ],
-            [ 0, 936, 21 ],
-            [ 194, 857, 17 ],
-            [ 296, 841, 15 ],
-            [ 539, 788, 18 ],
-            [ 665, 802, 17 ],
-            [ 1101, 822, 19 ],
-            [ 1275, 857, 19 ],
-            [ 1380, 824, 19 ],
-            [ 1483, 925, 22 ],
-            [ 1404, 1007, 15 ],
-            [ 1265, 996, 17 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 11 ],
-        ],
-        [ 359, 36 ]
-    ],
-    // Sagittarius
-    [
-        [
-            [ 306, 0, 23 ],   [ 427, 127, 32 ], [ 482, 160, 25 ], [ 590, 206, 18 ],  [ 566, 346, 41 ],
-            [ 663, 383, 29 ], [ 884, 514, 34 ], [ 834, 700, 45 ], [ 889, 813, 30 ],  [ 1024, 558, 26 ],
-            [ 992, 154, 25 ], [ 833, 323, 33 ], [ 462, 411, 28 ], [ 500, 501, 35 ],  [ 0, 389, 19 ],
-            [ 11, 771, 21 ],  [ 83, 1044, 22 ], [ 333, 968, 24 ], [ 351, 1131, 25 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5 ],
-            [ 6, 7, 8 ],
-            [ 11, 6, 9 ],
-            [ 10, 11, 5, 13, 12, 4 ],
-            [ 12, 14, 15, 16, 17 ],
-            [ 16, 18 ],
-        ],
-        [ 444, 42 ]
-    ],
-    // Scorpius
-    [
-        [
-            [ 121, 732, 33 ],
-            [ 91, 720, 46 ],
-            [ 33, 811, 36 ],
-            [ 0, 864, 30 ],
-            [ 88, 964, 44 ],
-            [ 292, 966, 28 ],
-            [ 428, 926, 25 ],
-            [ 445, 747, 30 ],
-            [ 453, 590, 37 ],
-            [ 582, 344, 32 ],
-            [ 631, 261, 55 ],
-            [ 720, 242, 31 ],
-            [ 920, 131, 37 ],
-            [ 825, 0, 24 ],
-            [ 882, 13, 35 ],
-            [ 924, 278, 31 ],
-            [ 933, 410, 23 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ],
-            [ 13, 14, 12, 15, 16 ],
-        ],
-        [ 425, 41 ]
-    ],
-    // Taurus
-    [
-        [
-            [ 148, 0, 57 ],
-            [ 684, 323, 27 ],
-            [ 851, 516, 33 ],
-            [ 925, 601, 31 ],
-            [ 966, 700, 32 ],
-            [ 1215, 853, 33 ],
-            [ 0, 392, 39 ],
-            [ 742, 638, 72 ],
-            [ 853, 689, 34 ],
-            [ 1202, 1197, 29 ],
-            [ 1035, 1054, 26 ],
-            [ 1597, 806, 27 ],
-            [ 1658, 967, 31 ],
-            [ 1691, 1000, 32 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5 ],
-            [ 6, 7, 8, 4 ],
-            [ 9, 10, 5, 11, 12, 13 ],
-        ],
-        [ 527, 52 ]
-    ],
-    // Virgo
-    [
-        [
-            [ 0, 393, 25 ],
-            [ 474, 405, 21 ],
-            [ 757, 491, 28 ],
-            [ 1312, 523, 38 ],
-            [ 1550, 498, 24 ],
-            [ 1859, 398, 26 ],
-            [ 1914, 199, 23 ],
-            [ 1710, 103, 23 ],
-            [ 1099, 0, 32 ],
-            [ 1171, 322, 28 ],
-            [ 1021, 703, 21 ],
-            [ 843, 923, 57 ],
-            [ 38, 712, 24 ],
-            [ 324, 724, 23 ],
-        ],
-        [
-            [ 0, 1, 2, 3, 4, 5, 6, 7, 4 ],
-            [ 8, 9, 3, 10, 11 ],
-            [ 12, 13, 2 ],
-        ],
-        [ 423, 42 ]
-    ],
-];
-zodiac_shape = [ 12, 3, undef, undef ];
-assert(list_shape(zodiac_constellations) == zodiac_shape);
