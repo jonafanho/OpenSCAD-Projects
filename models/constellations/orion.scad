@@ -15,4 +15,4 @@ connections = [
 ];
 scale = [ 407, 40 ];
 
-constellation(points, connections, scale, false, false);
+constellation(points, connections, scale);

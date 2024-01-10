@@ -12,13 +12,15 @@ bar_width = 2;
 point_scale = 60;
 star_scale = 0.8;
 
+raised = true;
+
 module star(corners, size, offset)
 {
     path = round_corners(path = star(n = corners, r = 10 * size, ir = 5 * size), r = size);
     linear_extrude(star_height) polygon(offset == 0 ? path : offset(path, delta = offset));
 }
 
-module constellation(points, connections, scale, raised, dotted)
+module constellation(points, connections, scale)
 {
     scale1 = point_scale / scale[0];
     scale2 = star_scale / scale[1];
@@ -49,16 +51,6 @@ module constellation(points, connections, scale, raised, dotted)
         {
             connections(bar_width / 3, star_height);
             stars(bar_width / 3);
-
-            if (dotted)
-            {
-                for (group = connections)
-                {
-                    path = [for (connection = group)[points[connection][0] * scale1, -points[connection][1] * scale1]];
-                    path_copies(path, spacing = bar_width * 2)
-                        cube([ bar_width * 2 - bar_width * 2 / 3, bar_width, star_height ], anchor = BOTTOM);
-                }
-            }
         }
     }
 }
