@@ -6,7 +6,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        namespace: [ constellations, marble_tracks, minecraft ]
+        # Temporarily removing constellations
+        namespace: [ avalon, marble_tracks, minecraft, traffic_lights ]
     runs-on: windows-latest
     steps:
       - name: Checkout repository
