@@ -25,7 +25,6 @@ module character_card()
         role = characters[character][0];
         has_role = role != "";
 
-        card_base();
         up(2)
         {
             difference()
@@ -67,17 +66,21 @@ module character_card()
 
     if (layer == 0)
     {
-        difference()
-        {
-            card();
-            color_layer(1);
-        }
+        card_base();
     }
     else if (layer == 1)
     {
         card_middle();
     }
     else if (layer == 2)
+    {
+        difference()
+        {
+            card();
+            color_layer(1);
+        }
+    }
+    else if (layer == 3)
     {
         intersection()
         {
