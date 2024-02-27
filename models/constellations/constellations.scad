@@ -9,7 +9,7 @@ include <../libraries/std.scad>
 star_height = 2;
 bar_height = 1;
 bar_width = 2;
-bar_width_small = 2/3;
+bar_width_small = 2 / 3;
 point_scale = 60;
 star_scale = 0.8;
 
