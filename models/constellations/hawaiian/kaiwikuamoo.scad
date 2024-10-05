@@ -71,9 +71,9 @@ else if (layer == 2)
 }
 else if (layer == 3)
 {
-    constellation(points4, connections4, scale, [], [[points4 [1], points4 [0]], [points4 [5], points4 [6]]]);
+    constellation(points4, connections4, scale, [], [[points4 [1], points4 [0]], [points4 [6], points4 [5]]]);
 }
 else if (layer == 4)
 {
-    constellation(points5, connections5, scale, [[points4 [5], points4 [6]]], []);
+    constellation(points5, connections5, scale, [[points4 [6], points4 [5]]], []);
 }
