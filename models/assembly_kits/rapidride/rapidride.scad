@@ -7,6 +7,9 @@ use <panels.scad>
 use <poles.scad>
 use <roof.scad>
 
+$fn = $preview ? 16 : 32;
+$slop = 0.2;
+
 module shelter()
 {
     recolor("whitesmoke")
@@ -16,12 +19,15 @@ module shelter()
             ground();
             back_poles();
             front_poles();
-            top_poles();
-            back_panel();
+            top_poles_1();
+            top_poles_2();
+            back_panel(false);
+            back_panel(true);
             side_panels();
             back_frames();
             side_frames();
-            drain();
+            drain(false);
+            drain(true);
             roof_1();
             roof_2();
             flag_poles();
@@ -37,3 +43,4 @@ module shelter()
 }
 
 shelter();
+// test_connectors(pole_size);

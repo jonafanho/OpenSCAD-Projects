@@ -1,11 +1,8 @@
 include <../../libraries/std.scad>
+include <connector.scad>
 include <constants.scad>
 
-panel_bottom = dimension_scale(17);
-panel_middle = dimension_scale(29);
-panel_top = dimension_scale(85);
 panel_depth = dimension_scale(34.5);
-panel_pole_width = dimension_scale(3);
 panel_pole_offset = (panel_pole_width + pole_size) / 2;
 panel_width = inner_half_width - panel_pole_offset;
 
@@ -27,59 +24,152 @@ handrail_offset_y = dimension_scale(5);
 handrail_offset_z = dimension_scale(5);
 handrail_support_width = dimension_scale(0.75);
 
-module common_panel_pole()
+module side_holes()
 {
-    up(panel_middle) right(panel_width)
+    right(panel_width)
     {
-        size1 = [ panel_pole_width, panel_pole_width, pole_size ];
-        down(panel_pole_thickness / 2) cuboid(size1, rounding = panel_pole_rounding, anchor = BOTTOM);
-        size2 = [ panel_pole_width, panel_pole_width ];
-        prismoid(size2, size2, rounding = panel_pole_rounding, h = inner_height - panel_middle - pole_size / 2);
+        up(panel_bottom) small_rectangle(true, panel_pole_width);
+        up(panel_middle) small_rectangle(true, panel_pole_width);
+        up(panel_top) small_rectangle(true, panel_pole_width);
     }
 }
 
-module back_panel()
+module back_panel(is_male)
 {
-    size1 = [ panel_pole_thickness, panel_pole_width ];
-    h = inner_half_width - pole_size / 2;
-    up(panel_bottom) prismoid(size1, size1, rounding = panel_pole_rounding, h = h, orient = RIGHT);
-    up(panel_middle) prismoid(size1, size1, rounding = panel_pole_rounding, h = panel_width, orient = RIGHT);
-    up(panel_top) prismoid(size1, size1, rounding = panel_pole_rounding, h = panel_width, orient = RIGHT);
-
-    up((panel_bottom + panel_top) / 2) right(panel_width / 4)
+    module back_panel_main()
     {
-        total_height = panel_top - panel_bottom + panel_pole_thickness;
-        size2 = [ panel_pole_thickness, panel_pole_width, total_height ];
-        cuboid(size2, rounding = panel_pole_rounding);
-        right(panel_width / 2) cuboid(size2, rounding = panel_pole_rounding);
+        difference()
+        {
+            union()
+            {
+                size = [ panel_pole_thickness, panel_pole_width ];
+                h = inner_half_width - pole_size / 2;
+                up(panel_bottom) prismoid(size, size, rounding = panel_pole_rounding, h = h, orient = RIGHT);
+                up(panel_middle) prismoid(size, size, rounding = panel_pole_rounding, h = panel_width, orient = RIGHT);
+                up(panel_top) prismoid(size, size, rounding = panel_pole_rounding, h = panel_width, orient = RIGHT);
+
+                up((panel_bottom + panel_top) / 2) right(panel_width / 4)
+                {
+                    total_height = panel_top - panel_bottom + panel_pole_thickness;
+                    size1 = [ panel_pole_thickness, panel_pole_width, total_height ];
+                    cuboid(size1, rounding = panel_pole_rounding);
+                    right(panel_width / 2) cuboid(size1, rounding = panel_pole_rounding);
+                }
+
+                up(panel_middle) right(panel_width)
+                {
+                    size1 = [ panel_pole_width, panel_pole_width ];
+                    h = inner_height - panel_middle - pole_size / 2;
+                    prismoid(size1, size1, rounding = panel_pole_rounding, h = h);
+                }
+
+                up(inner_height - pole_size / 2) right(panel_width) yrot(90) small_rectangle(false, pole_size / 2);
+                back_frames_base(panel_middle, panel_top, frame_rim - 1, frame_depth / 3, panel_pole_width);
+                back_frames_base(panel_bottom, panel_middle, grate_rim, grate_depth, 0);
+            }
+
+            up(panel_middle) right(panel_width - get_slop() / 2) zcopies(panel_top - panel_middle, 2, sp = 0)
+            {
+                cuboid([ pole_size, pole_size, panel_pole_thickness + get_slop() ], anchor = LEFT);
+            }
+
+            side_holes();
+
+            up((sign_bottom_bound + sign_top_bound) / 2) right(panel_width)
+            {
+                cuboid([ panel_pole_width + 1, sign_depth + get_slop(), sign_support_size + get_slop() ]);
+            }
+        }
     }
 
-    common_panel_pole();
-    frames(panel_bottom, panel_middle, grate_rim, grate_depth, 0);
+    mask_offset = panel_width / 4 + 0.5 + (is_male ? get_slop() : 0);
+
+    module dovetail_panel()
+    {
+        slide = panel_top - panel_bottom - (is_male ? get_slop() * 2 : 0);
+        up((panel_bottom + panel_top) / 2) right(mask_offset + (is_male ? 0 : get_slop())) xrot(90)
+            yrot(is_male ? -90 : 90) dovetail_modified(is_male, slide);
+    }
+
+    mask = [ mask_offset, panel_pole_width + 1, inner_height ];
+
+    if (is_male)
+    {
+        difference()
+        {
+            back_panel_main();
+            cuboid(mask, anchor = BOTTOM + LEFT);
+        }
+        dovetail_panel();
+    }
+    else
+    {
+        difference()
+        {
+            intersection()
+            {
+                back_panel_main();
+                cuboid(mask, anchor = BOTTOM + LEFT);
+            }
+            dovetail_panel();
+        }
+    }
 }
 
 module side_panels()
 {
-    right(panel_width)
+    module dovetail_panel()
     {
-        size1 = [ panel_pole_width, panel_pole_thickness ];
-        up(panel_middle) prismoid(size1, size1, rounding = panel_pole_rounding, h = panel_depth, orient = FORWARD);
-        up(panel_top) prismoid(size1, size1, rounding = panel_pole_rounding, h = panel_depth, orient = FORWARD);
-        size2 = [ panel_pole_width, panel_pole_thickness, panel_top - panel_middle + panel_pole_thickness ];
-        up((panel_middle + panel_top) / 2) fwd(panel_depth) cuboid(size2, rounding = panel_pole_rounding);
+        right(panel_pole_width / 2 + get_slop()) fwd(inner_depth) yrot(90) dovetail_modified(false, 4);
     }
 
-    common_panel_pole();
+    difference()
+    {
+        right(panel_width)
+        {
+            size1 = [ panel_pole_width, panel_pole_thickness ];
+            size2 = [ panel_pole_width / 2, panel_pole_width, panel_pole_thickness ];
+
+            up(panel_middle)
+            {
+                difference()
+                {
+                    prismoid(size1, size1, rounding = panel_pole_rounding, h = panel_depth, orient = FORWARD);
+                    cuboid([ pole_size, panel_pole_width + get_slop(), pole_size ], anchor = RIGHT);
+                    dovetail_panel();
+                }
+                edges = [ FRONT + BOTTOM, RIGHT + FRONT, RIGHT + BACK, BOTTOM + BACK ];
+                cuboid(size2, rounding = panel_pole_rounding, edges = edges, anchor = LEFT);
+            }
+
+            up(panel_top)
+            {
+                difference()
+                {
+                    prismoid(size1, size1, rounding = panel_pole_rounding, h = panel_depth, orient = FORWARD);
+                    cuboid([ pole_size, panel_pole_width + get_slop(), pole_size ], anchor = RIGHT);
+                    dovetail_panel();
+                }
+                edges = [ RIGHT + FRONT, RIGHT + BACK ];
+                cuboid(size2, rounding = panel_pole_rounding, edges = edges, anchor = LEFT);
+            }
+
+            size3 = [ panel_pole_width, panel_pole_thickness, panel_top - panel_middle + panel_pole_thickness ];
+            up((panel_middle + panel_top) / 2) fwd(panel_depth) cuboid(size3, rounding = panel_pole_rounding);
+            side_frames_base(frame_rim - 1, frame_depth / 3);
+        }
+
+        side_holes();
+    }
 }
 
-module frames(bottom_level, top_level, rim, depth, end_offset)
+module back_frames_base(bottom_level, top_level, rim, depth, end_offset)
 {
     up((bottom_level + top_level) / 2)
     {
         panel_height = top_level - bottom_level - panel_pole_thickness;
         size1 = [ panel_width / 2 - panel_pole_thickness, panel_height ];
-        right_half(s = top_level - bottom_level)
-            rect_tube(size = size1, wall = rim, h = depth, anchor = CENTER, orient = FRONT);
+        right_half(s = inner_height) rect_tube(size = size1, wall = rim, h = depth, anchor = CENTER, orient = FRONT);
         right(panel_width / 2) rect_tube(size = size1, wall = rim, h = depth, anchor = CENTER, orient = FRONT);
         end_width = panel_width / 4 - panel_pole_thickness / 2 - panel_pole_width / 2 + panel_pole_width - end_offset;
         size2 = [ end_width, panel_height ];
@@ -90,16 +180,30 @@ module frames(bottom_level, top_level, rim, depth, end_offset)
 
 module back_frames()
 {
-    color_this("firebrick") frames(panel_middle, panel_top, frame_rim, frame_depth, panel_pole_width);
+    color_this("firebrick") difference()
+    {
+        back_frames_base(panel_middle, panel_top, frame_rim, frame_depth, panel_pole_width);
+        cuboid([ inner_half_width, frame_depth / 3, inner_height ], anchor = BOTTOM + LEFT);
+    }
+}
+
+module side_frames_base(rim, depth)
+{
+    total_depth = panel_depth - panel_pole_thickness / 2;
+    up((panel_middle + panel_top) / 2) fwd(total_depth)
+    {
+        size = [ panel_top - panel_middle - panel_pole_thickness, total_depth - panel_pole_width / 2 - get_slop() / 2 ];
+        rect_tube(size = size, wall = rim, h = depth, anchor = FRONT, orient = RIGHT);
+    }
 }
 
 module side_frames()
 {
     total_depth = panel_depth - panel_pole_thickness / 2;
-    color_this("firebrick") right(panel_width) up((panel_middle + panel_top) / 2) fwd(total_depth)
+    color_this("firebrick") right(panel_width) difference()
     {
-        size = [ panel_top - panel_middle - panel_pole_thickness, total_depth - panel_pole_width / 2 ];
-        rect_tube(size = size, wall = frame_rim, h = frame_depth, anchor = FRONT, orient = RIGHT);
+        side_frames_base(frame_rim, frame_depth);
+        cuboid([ frame_depth / 3, outer_depth, inner_height ], anchor = BOTTOM + BACK);
     }
 }
 
@@ -123,7 +227,7 @@ module back_sign_support()
     up((sign_bottom_bound + sign_top_bound) / 2)
     {
         cuboid([ sign_width - panel_pole_rounding, sign_depth, sign_height - panel_pole_rounding * 2 ], anchor = LEFT);
-        cuboid([ sign_width + sign_support_size, sign_depth, sign_support_size ], anchor = LEFT);
+        cuboid([ sign_width + sign_support_size + panel_pole_width, sign_depth, sign_support_size ], anchor = LEFT);
     }
 }
 
