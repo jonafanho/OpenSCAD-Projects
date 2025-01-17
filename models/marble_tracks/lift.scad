@@ -1,4 +1,4 @@
-include <../libraries/gears.scad>
+include <../../openscad/libraries/gears.scad>
 include <connector.scad>
 
 pitch = 1.5;

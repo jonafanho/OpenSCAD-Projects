@@ -1,4 +1,4 @@
-include <../libraries/std.scad>
+include <../../openscad/libraries/std.scad>
 
 $fn = 50;
 track_radius = 9;

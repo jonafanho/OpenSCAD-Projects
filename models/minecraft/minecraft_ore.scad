@@ -1,4 +1,4 @@
-include <../libraries/std.scad>
+include <../../openscad/libraries/std.scad>
 
 pixels = 16;
 pattern = [

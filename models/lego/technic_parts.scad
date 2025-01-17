@@ -1,4 +1,4 @@
-include <../libraries/std.scad>
+include <../../openscad/libraries/std.scad>
 include <constants.scad>
 
 module technic_hole()

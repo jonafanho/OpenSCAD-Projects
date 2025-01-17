@@ -1,4 +1,4 @@
-include <../libraries/std.scad>
+include <../../openscad/libraries/std.scad>
 
 layer = 0;
 

@@ -1,5 +1,5 @@
-include <../libraries/rounding.scad>
-include <../libraries/std.scad>
+include <../../openscad/libraries/rounding.scad>
+include <../../openscad/libraries/std.scad>
 
 base_height = 23;
 rounding_radius = 8;

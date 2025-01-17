@@ -1,5 +1,5 @@
-include <../libraries/rounding.scad>
-include <../libraries/std.scad>
+include <../../openscad/libraries/rounding.scad>
+include <../../openscad/libraries/std.scad>
 
 // 1. Download the full size constellation image from https://www.iau.org/public/themes/constellations
 // 2. Get the x, y, and width of each star
@@ -14,6 +14,7 @@ point_scale = 60;
 star_scale = 0.8;
 
 raised = true;
+$fn = $preview ? 16 : 64;
 
 module star(corners, size, offset)
 {

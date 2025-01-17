@@ -1,4 +1,4 @@
-include <../libraries/std.scad>
+include <../../openscad/libraries/std.scad>
 
 display_length = 262;
 display_height = 33;
