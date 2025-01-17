@@ -14,6 +14,16 @@ module axle(is_hole, rotation, anchor = CENTER)
     zrot_copies(n = 3) zrot(rotation) up(shift) cuboid([ length, width, height ], anchor = [ 0, 1, anchor[2] ]);
 }
 
+module front_sign_hook(is_hole)
+{
+    padding = is_hole ? get_slop() : 0;
+    up(pole_size / 2 + padding / 2) fwd(outer_depth)
+    {
+        cuboid([ pole_size / 2 + padding, pole_size / 2 + padding, pole_size / 4 + padding ], anchor = BACK + TOP);
+        cuboid([ pole_size / 2 + padding, pole_size / 4 + padding, pole_size / 2 + padding ], anchor = TOP);
+    }
+}
+
 module small_rectangle(is_hole, length)
 {
     padding = is_hole ? get_slop() : 0;

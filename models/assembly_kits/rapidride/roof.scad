@@ -75,6 +75,13 @@ module top_poles_1()
             left(outer_depth) female_connector();
         }
 
+        up(pole_size / 2 + get_slop()) right(outer_half_width - pole_size)
+        {
+            fwd(inner_depth) zrot(90) roof_dovetail(false);
+            fwd(outer_depth) zrot(90) roof_dovetail(false);
+        }
+
+        right(outer_half_width - pole_size * 3) front_sign_hook(true);
         panel_width = inner_half_width - (panel_pole_width + pole_size) / 2;
         down(pole_size / 2) right(panel_width) yrot(90) small_rectangle(true, pole_size / 2);
     }
@@ -82,6 +89,12 @@ module top_poles_1()
 
 module top_poles_2()
 {
+    module roof_dovetails()
+    {
+        fwd(inner_depth) zrot(90) roof_dovetail(false);
+        fwd(outer_depth) zrot(90) roof_dovetail(false);
+    }
+
     up(inner_height) difference()
     {
         union()
@@ -98,6 +111,15 @@ module top_poles_2()
             left(inner_depth) male_connector([ pole_size, pole_size ]);
             left(outer_depth) male_connector([ pole_size, pole_size ]);
         }
+
+        up(pole_size / 2 + get_slop())
+        {
+            right(outer_half_width / 3 - pole_size) roof_dovetails();
+            right(outer_half_width / 3 + pole_size) roof_dovetails();
+        }
+
+        right(outer_half_width / 2 - pole_size) front_sign_hook(true);
+        right(outer_half_width / 2 + pole_size) front_sign_hook(true);
     }
 }
 
@@ -112,12 +134,13 @@ module drain(is_male)
     {
         up(inner_height + pole_size / 2) fwd(pole_size / 2 + drain_width / 2) difference()
         {
-            size1 = [ outer_half_width + front_sign_overhang, drain_width - get_slop(), back_slope_height ];
+            drain_length = outer_half_width + front_sign_overhang;
+            size1 = [ drain_length, drain_width - get_slop(), back_slope_height - get_slop() ];
             cuboid(size1, anchor = LEFT + BOTTOM);
             size2 = [ back_slope_height / 2, drain_width - back_slope_height / 2 ];
             size3 = [ back_slope_height, drain_width - back_slope_height / 2 ];
-            h = outer_half_width + front_sign_overhang + 1;
-            up(back_slope_height) prismoid(size1 = size2, size2 = size3, h = h, anchor = BOTTOM, orient = RIGHT);
+            up(back_slope_height)
+                prismoid(size1 = size2, size2 = size3, h = drain_length + 1, anchor = BOTTOM, orient = RIGHT);
             down(get_slop()) zflip()
             {
                 right(inner_half_width - pole_size / 3) roof_dovetail(false);
@@ -182,6 +205,12 @@ module roof(profile_anchor)
 
 module roof_1()
 {
+    module roof_dovetails()
+    {
+        fwd(inner_depth) zflip() zrot(90) roof_dovetail(true);
+        fwd(outer_depth) zflip() zrot(90) roof_dovetail(true);
+    }
+
     difference()
     {
         roof(BACK);
@@ -222,6 +251,10 @@ module roof_1()
             prismoid(size1 = size1, size2 = size2, shift = shift, h = h, anchor = RIGHT + FRONT + BOTTOM,
                      orient = FRONT);
         }
+
+        right(outer_half_width - pole_size) roof_dovetails();
+        right(outer_half_width / 3 - pole_size) roof_dovetails();
+        right(outer_half_width / 3 + pole_size) roof_dovetails();
     }
 }
 
@@ -245,5 +278,20 @@ module roof_2()
             s2 = [ 0, (height1 - height2) / 2 ];
             prismoid(size1 = size1, size2 = size2, shift = s2, h = h2, anchor = LEFT + BOTTOM + BACK, orient = BACK);
         }
+    }
+}
+
+module roof_cut(is_male)
+{
+    difference()
+    {
+        union()
+        {
+            roof_1();
+            roof_2();
+        }
+        size = [ outer_half_width, outer_depth * 2, front_sign_height ];
+        up(inner_height) right(outer_half_width / 3 + (is_male ? -1 : 1) * get_slop() / 2)
+            cuboid(size, anchor = (is_male ? LEFT : RIGHT) + BOTTOM + BACK);
     }
 }

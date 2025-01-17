@@ -28,15 +28,16 @@ module shelter()
             side_frames();
             drain(false);
             drain(true);
-            roof_1();
-            roof_2();
+            roof_cut(false);
+            roof_cut(true);
             flag_poles();
             back_sign_panels();
             back_sign_support();
             handrail();
-            front_sign_top();
+            front_sign(false);
+            front_sign(true);
         }
-        front_sign_main();
+        front_sign_text();
         flags();
         flag_logos();
     }
