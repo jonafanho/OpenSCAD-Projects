@@ -14,6 +14,7 @@ point_scale = 60;
 star_scale = 0.8;
 
 raised = true;
+equal_size = false;
 $fn = $preview ? 16 : 64;
 
 module star(corners, size, offset)
@@ -31,7 +32,7 @@ module constellation(points, connections, scale, female_joints = [], male_joints
 
     module single_star(point, offset)
     {
-        right(point[0] * scale1) fwd(point[1] * scale1) star(5, point[2] * scale2, offset);
+        right(point[0] * scale1) fwd(point[1] * scale1) star(5, equal_size ? 1 : point[2] * scale2, offset);
     }
 
     module stars(offset)
